@@ -1,0 +1,74 @@
+
+Table TEAMS
+  id
+  name
+  currq
+  completed
+  
+Table QUESTIONS
+  id
+  title
+  shorttitle
+  questionurl
+  submissiontype
+
+Table SUBMISSIONS
+  teamid
+  questionid
+  submissiontime
+  submissionurl
+  numvotes
+  
+CREATE TABLE `teams`(
+    `id` INT NOT NULL,
+    `name` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+    `currq` INT DEFAULT '0',
+	`completed` BOOLEAN NOT NULL DEFAULT FALSE,
+    PRIMARY KEY(`id`)
+) ENGINE = InnoDB;
+
+CREATE TABLE `questions`(
+    `id` INT NOT NULL,
+    `title` VARCHAR(1023) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+    `shorttitle` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+    `questionurl` VARCHAR(1023) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+    `submissiontype` ENUM('video', 'audio', 'text') NOT NULL,
+    PRIMARY KEY(`id`)
+) ENGINE = InnoDB;
+
+CREATE TABLE `submissions`(
+    `teamid` INT NOT NULL,
+    `questionid` INT NOT NULL,
+    `submissiontime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`submissionurl` VARCHAR(1023) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+    `numvotes` INT NOT NULL DEFAULT '0'
+) ENGINE = InnoDB;
+ALTER TABLE `submissions` ADD UNIQUE `teamQn` (`teamid`, `questionid`);
+ALTER TABLE `submissions` ADD FOREIGN KEY (`teamid`) REFERENCES teams(id);
+ALTER TABLE `submissions` ADD FOREIGN KEY (`questionid`) REFERENCES questions(id);
+
+Main quiz page:
+Header:
+	Quiz title
+	Team Name
+	Links
+Main:
+	Task title
+	Task
+	Submission button
+	
+After quiz ends:
+	Wait for all teams to finish
+	
+Voting page:
+Header:
+	Quiz title
+	Team Name
+Main:
+	- Team 1 submission (embedded video / audio / text
+	- Team 2 submission
+	...
+	- Team n submission
+
+	Radio button to vote
+	

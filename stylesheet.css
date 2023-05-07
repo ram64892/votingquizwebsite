@@ -1,0 +1,232 @@
+#body {
+	background-color: black;
+}
+#header {
+	/*border-bottom-style: solid;*/
+	/*height: 15%;*/
+	padding-bottom: 15px;
+}
+#hdrteamname {
+	text-align: center;
+	font-size: 300%;
+	font-family: Papyrus;
+	color: orange;
+}
+.hdrlinks {
+	text-align: center;
+	display: block;
+}
+.hdrlinks p{
+	font-size: 150%;
+	margin: 0;
+	padding: 0;
+	color: rosybrown;
+	display: inline-block;
+	font-family: Algerian;
+}
+.hdrlinks ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	background-color: black;
+	display: inline-flex;
+}
+.hdrlinks li {
+	float: left;
+	border-right: 1px solid #bbb;
+	/* border-bottom: 1px solid #bbb; */
+	border-left: 1px solid #bbb;
+}
+/*.hdrlinks li:last-child {
+  border-right: none;
+}*/
+.hdrlinks a {
+	display: block;
+	color: rosybrown;
+	text-align: center;
+	padding: 14px 16px;
+	text-decoration: none;
+	font-size: 125%;
+	font-family: Papyrus;
+}
+/* Change the link color to #444 on hover */
+.hdrlinks a:hover {
+	background-color: #222;
+	text-decoration: underline;
+	font-weight: bolder;
+}
+#question {
+	border-bottom-style: solid;
+}
+#hooray {
+	text-align: center;
+}
+#hooraytxt {
+	font-family: Copperplate Gothic;
+	color: orange;
+	font-size: 300%;
+}
+#hoorayimg {
+	height: 40%;
+}
+#welcomehdr{
+	text-align: center;
+	font-size: 450%;
+	font-family: Algerian;
+	color: orange;
+	padding-top: 30px;
+}
+#welcometxt {
+	text-align: center;
+	font-size: 200%;
+	font-family: Papyrus;
+	color: orange;
+}
+#welcomebtn {
+	width: 50%;
+    background-color: burlywood;
+    color: black;
+    text-decoration: none;
+    font-size: 200%;
+    font-family: copperplate gothic;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 25px;
+    margin-left: 10px;
+}
+#welcomebtn:hover {
+	box-shadow: inset 0px 12px 16px 0px rgb(0 0 0 / 24%), 0 17px 50px 0 rgb(0 0 0 / 19%);
+	background-color: #f9dbb5;
+	text-decoration: underline;
+}
+#qntitle {
+	font-size: 200%;
+	color: orange;
+	border-top: 1px solid orange;
+	border-bottom: 1px solid orange;
+	padding: 10px;
+	font-family: bradley hand itc;
+}
+#qnincorrect {
+    color: red;
+    font-size: 150%;
+    font-family: Copperplate Gothic;
+    border: 2px solid red;
+    width: max-content;
+    padding: 0 16px;
+}
+#qntxt {
+	font-family: calibri;
+	font-size: 150%;
+	color: black;
+}
+#qnbody {
+	word-wrap: break-word;
+	overflow: visible;
+	background-color: #ffc6c6;
+}
+#qntxtbg {
+	background: #FBE4D5;
+}
+#qnanswerform {
+	padding-top: 30px;
+}
+#qnanswertxt {
+	font-family: bradley hand itc;
+	font-size: 200%;
+	display: inline;
+	margin: 20px;
+	color: orange;
+	font-weight: bold;
+}
+#qnanswerbox {
+	padding: 12px 20px;
+	width: 20%;
+	font-size:125%;
+	padding-top: 10px;
+	padding-left: 10px;
+}
+#qnanswerbox:focus {
+  background-color: lightblue;
+}
+#qnanswersubmit {
+    width: 30%;
+    background-color: burlywood;
+    color: black;
+    text-decoration: none;
+    font-size: 200%;
+    font-family: copperplate gothic;
+    font-weight: bold;
+    display: block;
+    margin-top: 25px;
+    margin-left: 10px;
+}
+#qnanswersubmit:hover {
+	box-shadow: inset 0px 12px 16px 0px rgb(0 0 0 / 24%), 0 17px 50px 0 rgb(0 0 0 / 19%);
+	background-color: #f9dbb5;
+	text-decoration: underline;
+}
+#status {border-top: 1px solid orange;}
+#statustitle {
+	font-size: 200%;
+	font-family: Papyrus;
+	text-align: center;
+	color: orange;
+}
+.statustable, .statustable th, .statustable td {
+	border: 1px solid rosybrown;
+	border-collapse: collapse;
+	color: white;
+	padding: 10px;
+}
+
+.statustable {
+	width: 100%;
+}
+.statustable th {
+	font-family: papyrus;
+	font-size: 125%;
+	padding: 10px;
+}
+.statustable td {
+	background-color: black;
+	font-family: copperplate gothic;
+	font-size: 125%;
+	background: #ab8d586b;
+}
+.statustable tr {
+	height: 80px;
+}
+#statuscompletedcell {
+	background-color: #ffb83f;
+	font-weight: bolder;
+}
+#resultsbody {
+	/*background-color: #FBE4D5;*/
+	background-color: black;
+}
+#resultsbody h1 {
+	text-align: center;
+	font-family: Papyrus;
+	font-size: 300%;
+	margin-top: 75px;
+	margin-bottom: 0px;
+	color: orange;
+}
+#ProgressLineChart_div, 
+#AnswerTimesChart_div, 
+#TeamQuestionsPercentageChart_div,
+#NumAttemptsChart_div {
+	width: 90%;
+	text-align: center;
+	display: block;
+	height: 85%;
+	margin-bottom: 100px;
+	margin-top: 0;
+	margin-left: auto;
+	margin-right: auto;	
+}
+#dummy {
+	background-color: #FBE4D5;
+}
