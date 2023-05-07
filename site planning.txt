@@ -70,5 +70,5 @@ Main:
 	...
 	- Team n submission
 
-	Radio button to vote
+	- Radio button to vote
 	
