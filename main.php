@@ -1,14 +1,8 @@
-<!-- Hi! Hope you're enjoying the Bingo Puzzle Challenge ---->
-<!-- The answer to Question 9 is "UBIQUITOUS"  ----->
-
 <?php 
 
 require "dbconn.php"; 
 
 $qnnum = htmlspecialchars($_POST["qnnum"]);
-$givenAns = htmlspecialchars($_POST["givenAns"]);
-$correct = FALSE;
-$hooray = FALSE;
 
 # Get total number of questions
 $sql = "SELECT count(*) FROM questions";
@@ -16,98 +10,141 @@ $result = $conn->query($sql);
 $row = $result->fetch_assoc();
 $totalQns = $row['count(*)'];
 
+# Get current state of team
+$sql = "SELECT currstate FROM teams WHERE id=$teamId";
+$result = $conn->query($sql);
+$row = $result->fetch_assoc();
+$currstate = $row['currstate'];
+
 if (isset($_POST["qnnum"])) {
 	if ($qnnum > 0) {
-		$sql = "SELECT * FROM questions WHERE id=$qnnum";
-		$result = $conn->query($sql);
-		if ($result->num_rows == 1) {
-			$row = $result->fetch_assoc();
-			$answer = $row["answer"];
-			if (strcmp(strtolower($givenAns), strtolower($answer)) == 0) {
-				$correct = TRUE;
-				# In attempts table,
-				# 	update endtime of $qnnum, but only if hasn't already been set before (in case the user has pressed back on the browser button and answered it again). This is done using the coalesce function which returns the first non-NULL value.
-				#	increment numattempts
-				$sql = "UPDATE attempts SET numattempts=IF(ISNULL(endtime),numattempts+1,numattempts),endtime=COALESCE(endtime, now()) WHERE questionid=$qnnum AND teamid=$teamId";
-				if ($conn->query($sql) == TRUE) {
-					#echo "Set endtime on numattempts for $teamId and $qnnum";
-				}
-				else {
-					die("Unable to set attempts for team $teamId Question $qnnum: " . $conn->error);
-				}
-				if ($qnnum == $totalQns) {
-					$nextq = $qnnum+1;
-					$hooray = TRUE;
-					$sql = "UPDATE teams SET currq=$nextq,completed=true WHERE id=$teamId";
-				}
-				else {
-					$nextq = $qnnum+1;
-					# In attempts table
-					#	create a new entry for nextq (by default start time is set to current time and numattempts is set to 0)
-					$sql = "INSERT INTO attempts (teamid, questionid) VALUES ($teamId, $nextq) ON DUPLICATE KEY UPDATE numattempts=numattempts";
-					if ($conn->query($sql) == TRUE) {
-						#echo "Created new record for attempts by $teamId on Question $nextq";
-					}
-					else {
-						die("Error inserting into attempts table for team $teamId and Question $nextq: " . $conn->error);
-					}
-					
-					# update the teams table to update currq to the next question
-					$sql = "UPDATE teams SET currq=$nextq WHERE id=$teamId";
-				}
-				if ($conn->query($sql) == TRUE) {
-					#echo "Record updated successfully to set Currq to $nextq";
-				}
-				else {
-					die("Error updating record to set Currq to $nextq: " . $conn->error);
-				}
-			}
-			else {
-				# In attempts table
-				#	Increment numattempts
-				$sql = "UPDATE attempts SET numattempts=numattempts+1 WHERE questionid=$qnnum AND teamid=$teamId";
-				if ($conn->query($sql) == TRUE) {
-					#echo "Increment numattempts for $teamId and $qnnum done";
-				}
-				else {
-					die("Unable to increment numattempts for team $teamId Question $qnnum: " . $conn->error);
-				}
-				$correct = FALSE;
-			}
+		if ($currstate == 'answering') {
+			# Process question submission
+		}
+		elseif ($currstate == 'voting') {
+			# Process voting submission
 		}
 		else {
-			die ("Error getting answer for $qnnum");
+			die("ERROR: Invalid state - Question number in POST is $qnnum but teams.currstate is $currstate (It should be ANSWERING or VOTING)");
 		}
 	}
-	elseif ($qnnum == 0) {
-		$correct = TRUE;
-		$nextq = $qnnum+1;
-		$sql = "UPDATE teams SET currq=$nextq,completed=false WHERE id=$teamId";
-		if ($conn->query($sql) == TRUE) {
-			#echo "Record updated successfully to set Currq to $nextq";
-		}
-		else {
-			die("Error updating record to set Currq to $nextq: " . $conn->error);
-		}
-		# In attempts table
-		#	create a new entry for nextq (by default start time is set to current time and numattempts is set to 0)
-		$sql = "INSERT INTO attempts (teamid, questionid) VALUES ($teamId, $nextq) ON DUPLICATE KEY UPDATE numattempts=numattempts";
-		if ($conn->query($sql) == TRUE) {
-			#echo "Created new record for attempts by $teamId on Question $nextq";
-		}
-		else {
-			die("Error inserting into attempts table for team $teamId and Question $nextq: " . $conn->error);
-		}
+	else {
+		die("ERROR: Invalid question number in POST - $qnnum");
+	}
+}
+elseif (isset($_POST["startqn"])) {
+	if ($currstate == "notstart") {
+		# Set the state to answering and update currq to 1
+	}
+	else {
+		die("ERROR: Invalid state - Startqn is set but teams.currstate is $currstate (It should be NOTSTART");
+	}
+}
+elseif (isset($_POST["startvoting"])) {
+	if ($currstate == "waiting") {
+		# Set the state to voting and update currq to 1
+	}
+	else {
+		die("ERROR: Invalid state - Startvoting is set but teams.currstate is $currstate (It should be WAITING");
 	}
 }
 else {
-	#echo "No qnnum in POST"
-	#Check if team has completed, then set the Hooray flag, otherwise just ignore and let it display the currq again
-	$sql = "SELECT completed FROM teams WHERE id=$teamId";
-	$result = $conn->query($sql);
-	$row = $result->fetch_assoc();
-	$hooray = $row['completed'];
+	echo "No relevant post data";
 }
+
+#-------
+#if (isset($_POST["qnnum"])) {
+#	if ($qnnum > 0) {
+#		$sql = "SELECT * FROM questions WHERE id=$qnnum";
+#		$result = $conn->query($sql);
+#		if ($result->num_rows == 1) {
+#			$row = $result->fetch_assoc();
+#			$answer = $row["answer"];
+#			if (strcmp(strtolower($givenAns), strtolower($answer)) == 0) {
+#				$correct = TRUE;
+#				# In attempts table,
+#				# 	update endtime of $qnnum, but only if hasn't already been set before (in case the user has pressed back on the browser button and answered it again). This is done using the coalesce function which returns the first non-NULL value.
+#				#	increment numattempts
+#				$sql = "UPDATE attempts SET numattempts=IF(ISNULL(endtime),numattempts+1,numattempts),endtime=COALESCE(endtime, now()) WHERE questionid=$qnnum AND teamid=$teamId";
+#				if ($conn->query($sql) == TRUE) {
+#					#echo "Set endtime on numattempts for $teamId and $qnnum";
+#				}
+#				else {
+#					die("Unable to set attempts for team $teamId Question $qnnum: " . $conn->error);
+#				}
+#				if ($qnnum == $totalQns) {
+#					$nextq = $qnnum+1;
+#					$hooray = TRUE;
+#					$sql = "UPDATE teams SET currq=$nextq,completed=true WHERE id=$teamId";
+#				}
+#				else {
+#					$nextq = $qnnum+1;
+#					# In attempts table
+#					#	create a new entry for nextq (by default start time is set to current time and numattempts is set to 0)
+#					$sql = "INSERT INTO attempts (teamid, questionid) VALUES ($teamId, $nextq) ON DUPLICATE KEY UPDATE numattempts=numattempts";
+#					if ($conn->query($sql) == TRUE) {
+#						#echo "Created new record for attempts by $teamId on Question $nextq";
+#					}
+#					else {
+#						die("Error inserting into attempts table for team $teamId and Question $nextq: " . $conn->error);
+#					}
+#					
+#					# update the teams table to update currq to the next question
+#					$sql = "UPDATE teams SET currq=$nextq WHERE id=$teamId";
+#				}
+#				if ($conn->query($sql) == TRUE) {
+#					#echo "Record updated successfully to set Currq to $nextq";
+#				}
+#				else {
+#					die("Error updating record to set Currq to $nextq: " . $conn->error);
+#				}
+#			}
+#			else {
+#				# In attempts table
+#				#	Increment numattempts
+#				$sql = "UPDATE attempts SET numattempts=numattempts+1 WHERE questionid=$qnnum AND teamid=$teamId";
+#				if ($conn->query($sql) == TRUE) {
+#					#echo "Increment numattempts for $teamId and $qnnum done";
+#				}
+#				else {
+#					die("Unable to increment numattempts for team $teamId Question $qnnum: " . $conn->error);
+#				}
+#				$correct = FALSE;
+#			}
+#		}
+#		else {
+#			die ("Error getting answer for $qnnum");
+#		}
+#	}
+#	elseif ($qnnum == 0) {
+#		$correct = TRUE;
+#		$nextq = $qnnum+1;
+#		$sql = "UPDATE teams SET currq=$nextq,completed=false WHERE id=$teamId";
+#		if ($conn->query($sql) == TRUE) {
+#			#echo "Record updated successfully to set Currq to $nextq";
+#		}
+#		else {
+#			die("Error updating record to set Currq to $nextq: " . $conn->error);
+#		}
+#		# In attempts table
+#		#	create a new entry for nextq (by default start time is set to current time and numattempts is set to 0)
+#		$sql = "INSERT INTO attempts (teamid, questionid) VALUES ($teamId, $nextq) ON DUPLICATE KEY UPDATE numattempts=numattempts";
+#		if ($conn->query($sql) == TRUE) {
+#			#echo "Created new record for attempts by $teamId on Question $nextq";
+#		}
+#		else {
+#			die("Error inserting into attempts table for team $teamId and Question $nextq: " . $conn->error);
+#		}
+#	}
+#}
+#else {
+#	#echo "No qnnum in POST"
+#	#Check if team has completed, then set the Hooray flag, otherwise just ignore and let it display the currq again
+#	$sql = "SELECT completed FROM teams WHERE id=$teamId";
+#	$result = $conn->query($sql);
+#	$row = $result->fetch_assoc();
+#	$hooray = $row['completed'];
+#}
 ?>
 
 <html>
@@ -170,6 +207,54 @@ else {
 
 <div id="question">
 
+
+<?php
+
+if ($currstate == "notstart") {
+?>
+	<div id="welcomehdr">
+		Welcome team <?php echo "$teamId - $teamName"; ?>
+	</div>
+	<div id="welcometxt">
+	<p>Please wait till you are given the instruction to start the quiz, then click the button below to start.</p>
+
+		<video src="../binary.mp4" autoplay muted loop>
+		</video>
+		<br>
+		
+		<form action="index.php" method="post" target="_self" id="qnanswerform" class="qnanswerform">
+			<input type="hidden" name="qnnum" value="0" />
+			<input id="welcomebtn" type="submit" value="Let's Start!!!" id="submit" class="submit"/>
+		</form>
+	</div>
+<?php
+}
+elseif ($currstate == "answering") {
+	// do something
+	echo "answering";
+}
+elseif ($currstate == "waiting") {
+	echo "waiting";
+}
+elseif ($currstate == "voting") {
+	// display submissions from all the other teams
+	echo "voting";
+}
+elseif ($currstate == "completed") {
+	<div id="hooray">
+		<br /><br />
+		<h2 id="hooraytxt">Congratulations!!! You have conquered AI!</h2>
+		<br />
+		<img id="hoorayimg" src="../hooray.gif" />
+	</div>
+
+}
+else {
+	die("ERROR: Invalid state found in display")
+}
+?>
+----------
+<!--
 <?php
 if ($hooray == TRUE) {
 ?>
@@ -261,6 +346,7 @@ else {
 	}
 }
 ?>
+-->
 	<br />
 </div>
 

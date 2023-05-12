@@ -3,7 +3,7 @@ Table TEAMS
   id
   name
   currq
-  completed
+  currstate
   
 Table QUESTIONS
   id
@@ -23,7 +23,7 @@ CREATE TABLE `teams`(
     `id` INT NOT NULL,
     `name` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
     `currq` INT DEFAULT '0',
-	`completed` BOOLEAN NOT NULL DEFAULT FALSE,
+	`currstate` ENUM('notstart', 'answering', 'waiting', 'voting', 'completed') NOT NULL DEFAULT 'notstart',
     PRIMARY KEY(`id`)
 ) ENGINE = InnoDB;
 
@@ -32,7 +32,7 @@ CREATE TABLE `questions`(
     `title` VARCHAR(1023) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
     `shorttitle` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
     `questionurl` VARCHAR(1023) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-    `submissiontype` ENUM('video', 'audio', 'text') NOT NULL,
+    `submissiontype` ENUM('video', 'audio', 'image', 'text') NOT NULL,
     PRIMARY KEY(`id`)
 ) ENGINE = InnoDB;
 

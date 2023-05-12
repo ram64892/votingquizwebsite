@@ -1,0 +1,97 @@
+On page load
+
+Get post details
+If (isset(post.qnnum)) {
+	if (qnnum > 0) {
+		if (teams.currstate == answering) {
+			check if there is submitted data
+			if (there is submitted data)
+				Upload submitted data to webserver
+				create new entry in "submissions" table and save the URL to file
+				if (post.qnnum == totalQns) {
+					set teams.currstate = waiting and teams.currq = 0 where teams.id = teamid
+				}
+				else {
+					increment teams.currq where teams.id == teamid
+				}
+			}
+			else {
+				$errorInSubmission = true
+				// do nothing else so that the same question is displayed again
+			}
+		}
+		else if (teams.currState == voting) {
+			check post data to ensure "questionid" and "voteteamid" are set in the post data.
+			increment submissions.numvotes where (submissions.questionid == post.qnnum) and (submissions.teamid == post.voteteamid)
+			if (post.qnnum == totalQns) {
+				set teams.currstate=completed and teams.qnnum = 0 where teams.id = teamid
+			}
+			else {
+				increment teams.currq where teams.id == teamid
+			}
+		}
+		else {
+			die("Error: Invalid state - post.qnnum > 0 but state is not answering or voting")
+		}
+		
+	}
+	else {
+		die("Error: Invalid qnnum in POST details");
+	}
+}
+else if (isset(post.startqn)) {
+	if (teams.currstate == notstart) {
+		set teams.currstate to answering and teams.currq = 1 where teams.id = teamid
+	}
+	else {
+		die ("Error: Invalid state - startQn is set but state is not Notstart")		
+	}	
+}
+else if (isset(post.startvoting)) {
+	if (teams.currstate == waiting) {
+		set teams.currstate to voting and teams.currq = 1 where teams.id = teamid
+	}
+	else {
+		die ("Error: Invalid state - startvoting is set but state is not waiting")		
+	}
+}
+
+
+Display the page
+----------------
+
+currstate = teams.currstate where teams.id = teamid
+currq = teams.currq where teams.id = teamid
+
+if (currstate == notstart) {
+	Display the quiz welcome page
+	on submit, post startqn
+}
+else if (currstate == answering) {
+	Get the questionurl,title,sumissiontype from questions where questions.id = currq
+	Display the title and question
+	Provide the submission file picker and submit button
+	On submit post qnnum and submitted data **** how to upload data ******
+}
+else if (currstate == waiting) {
+	Display the "wait for other teams page with instructions on how to vote"
+	On submit, post startvoting
+}
+else if (currstate == voting) {
+	get the title,questionurl,title,submissiontype from questions where question.id = currq
+	items = get submissionurl,teamid from submissions where submissions.questionid == currq and submissions.teamid != teamid 
+	display title
+	display question
+	for each object in items {
+		based on sumissiontype, display submissionurl
+	}
+	Display radio buttons for selection
+	display voting button
+	on submit, post qnnum, voteteamid
+}
+else if (currstate == completed) {
+	Display end of session message
+}
+else {
+	die ("Error: Invalid state found")
+}
