@@ -2,8 +2,6 @@
 
 require "dbconn.php"; 
 
-$qnnum = htmlspecialchars($_POST["qnnum"]);
-
 # Get total number of questions
 $sql = "SELECT count(*) FROM questions";
 $result = $conn->query($sql);
@@ -17,6 +15,7 @@ $row = $result->fetch_assoc();
 $currstate = $row['currstate'];
 
 if (isset($_POST["qnnum"])) {
+	$qnnum = htmlspecialchars($_POST["qnnum"]);
 	if ($qnnum > 0) {
 		if ($currstate == 'answering') {
 			# Process question submission
@@ -35,9 +34,18 @@ if (isset($_POST["qnnum"])) {
 elseif (isset($_POST["startqn"])) {
 	if ($currstate == "notstart") {
 		# Set the state to answering and update currq to 1
+		echo "Currstate is notstart and startqn is set";
+		$sql = "UPDATE teams SET currq=1,currstate='answering' WHERE id=$teamId";
+		if ($conn->query($sql) == TRUE) {
+			#echo "Record updated successfully to set Currq to 1 and state to answering";
+			$currstate="answering";
+		}
+		else {
+			die("Error updating record to set Currq to 1 and state to answering: " . $conn->error);
+		}
 	}
 	else {
-		die("ERROR: Invalid state - Startqn is set but teams.currstate is $currstate (It should be NOTSTART");
+		die("ERROR: Invalid state - Startqn is set but teams.currstate is $currstate (It should be NOTSTART)");
 	}
 }
 elseif (isset($_POST["startvoting"])) {
@@ -45,7 +53,7 @@ elseif (isset($_POST["startvoting"])) {
 		# Set the state to voting and update currq to 1
 	}
 	else {
-		die("ERROR: Invalid state - Startvoting is set but teams.currstate is $currstate (It should be WAITING");
+		die("ERROR: Invalid state - Startvoting is set but teams.currstate is $currstate (It should be WAITING)");
 	}
 }
 else {
@@ -184,7 +192,7 @@ else {
 
 <div id="header">
 
-	<h1 id="hdrteamname">Bingo Puzzle Challenge<br />Team <?php echo "$teamName";?></h1>
+	<h1 id="hdrteamname">Bingo A.I. Challenge<br />Team <?php echo "$teamName";?></h1>
 
 	<div class="hdrlinks">
 		<p>Useful links</p>
@@ -223,15 +231,62 @@ if ($currstate == "notstart") {
 		<br>
 		
 		<form action="index.php" method="post" target="_self" id="qnanswerform" class="qnanswerform">
-			<input type="hidden" name="qnnum" value="0" />
+			<input type="hidden" name="startqn" value="0" />
 			<input id="welcomebtn" type="submit" value="Let's Start!!!" id="submit" class="submit"/>
 		</form>
 	</div>
 <?php
 }
 elseif ($currstate == "answering") {
-	// do something
 	echo "answering";
+	$sql = "SELECT * FROM questions WHERE id=$currq";
+	$result = $conn->query($sql);
+	if ($result->num_rows == 1) {
+		$row = $result->fetch_assoc();
+		$qnid = $row["id"];
+		$questionurl = $row["questionurl"];
+		$title = $row["title"];
+?>
+	<div>
+		<h2 id="qntitle">Question <?php echo "$qnid - $title"; ?></h2>
+	
+		<iframe src='<?php echo "$questionurl"; ?>' width="100%" scrolling='yes' allow="autoplay" style='overflow:scroll' id='qniframe'></iframe>
+		
+		<script>
+			// Selecting the iframe element
+			var frame = document.getElementById("qniframe");
+			
+			// Adjusting the iframe height onload event
+			frame.onload = function()
+			// function execute while load the iframe
+			{
+			// set the height of the iframe as 
+			// the height of the iframe content
+			frame.style.height = 
+			frame.contentWindow.document.body.scrollHeight + 20 + 'px';
+			
+	
+			// set the width of the iframe as the 
+			// width of the iframe content
+			//frame.style.width  = 
+			//frame.contentWindow.document.body.scrollWidth+'px';
+			}
+        </script>
+
+		<form id="qnanswerform" action="index.php" method="post" target="_self" class="qnanswerform" enctype="multipart/form-data">
+			<input type="hidden" name="qnnum" value=<?php echo "$qnid"; ?> />
+			<p id="qnanswertxt">Submit your content here:</p> <br />
+			<!--<input id="qnanswerbox" type="text" name="givenAns" required />-->
+			<input id="fileToUpload" type="file" name="fileToUpload">
+			<input id="qnanswersubmit" type="submit" value="Submit" class="qnanswersubmit" />
+		</form>
+	</div>
+<?php
+		
+	}
+	else {
+		die("Error in getting question details for $currq");
+	}
 }
 elseif ($currstate == "waiting") {
 	echo "waiting";
@@ -241,20 +296,26 @@ elseif ($currstate == "voting") {
 	echo "voting";
 }
 elseif ($currstate == "completed") {
+?>
 	<div id="hooray">
 		<br /><br />
 		<h2 id="hooraytxt">Congratulations!!! You have conquered AI!</h2>
 		<br />
 		<img id="hoorayimg" src="../hooray.gif" />
 	</div>
+<?php
 
 }
 else {
-	die("ERROR: Invalid state found in display")
+	die("ERROR: Invalid state found in display");
 }
 ?>
-----------
+
+
+
+
 <!--
+----------
 <?php
 if ($hooray == TRUE) {
 ?>
