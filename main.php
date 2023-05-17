@@ -405,7 +405,9 @@ if ($currstate == "notstart") {
 		Welcome team <?php echo "$teamId - $teamName"; ?>
 	</div>
 	<div id="welcometxt">
-	<p>Please wait till you are given the instruction to start the quiz, then click the button below to start.</p>
+	<p>In today's quiz, your creativity will be put to the test. Today, you will not just be answering questions - you will be creating content! The aim is to create content that impresses the other teams or makes them laugh.</p>
+	<p>For each question, you will learn to use an AI tool to generate your content. Once you have created your answer, submit it on this website. All the teams will then vote on the submissions they like the most. The team with the most votes wins!</p>
+	<p>Click the button below to start.</p>
 
 		<video src="../binary.mp4" autoplay muted loop>
 		</video>
@@ -413,7 +415,7 @@ if ($currstate == "notstart") {
 		
 		<form action="index.php" method="post" target="_self" id="qnanswerform" class="qnanswerform">
 			<input type="hidden" name="startqn" value="0" />
-			<input id="welcomebtn" type="submit" value="Let's Start!!!" id="submit" class="submit"/>
+			<input id="welcomebtn" type="submit" value="Ready, Set... Let's AI!!!" id="submit" class="submit"/>
 		</form>
 	</div>
 <?php
@@ -558,15 +560,23 @@ elseif ($currstate == "voting") {
 <?php
 			if ($qnType == 'image') {
 ?>
-			<img id="submissionimg" src=<?php echo $subUrl; ?> />
+			<img id="submissionimg" src="<?php echo $subUrl; ?>" />
 			<br />
 <?php
 			}
 			elseif ($qnType == 'video') {
-				
+?>
+			<video id="submissionvid" src="<?php echo $subUrl; ?>" controls>
+			</video>
+			<br />
+<?php				
 			}
 			elseif ($qnType == 'audio') {
-				
+?>
+			<audio id="submissionaud" src="<?php echo $subUrl; ?>" controls>
+			</audio>
+			<br />
+<?php
 			}
 			elseif ($qnType == 'text') {
 ?>
@@ -599,7 +609,7 @@ elseif ($currstate == "voting") {
 		for ($i = 1; $i < $subNum; $i++) {
 ?>
 				<label id="votelabel">
-				<input type="radio" name="voting" value="<?php echo $subTeams[$i]; ?>">
+				<input type="radio" name="voting" value="<?php echo $subTeams[$i]; ?>" required>
 				Submission <?php echo $i; ?>
 				</label>
 <?php

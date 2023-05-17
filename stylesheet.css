@@ -140,6 +140,28 @@
 	color: orange;
 	font-weight: bold;
 }
+#fileToUpload {
+  width: 350px;
+  max-width: 100%;
+  color: #444;
+  padding: 5px;
+  background: #FBE4D5;
+  border-radius: 10px;
+  border: 1px solid #555;
+}
+#fileToUpload::file-selector-button {
+	margin-right: 20px;
+	border: none;
+	background: orange;
+	padding: 10px 20px;
+	border-radius: 10px;
+	color: #fff;
+	cursor: pointer;
+	transition: background .2s ease-in-out;
+}
+#fileToUpload::file-selector-button:hover {
+  background: DarkOrange;
+}
 #qnanswerbox {
 	padding: 12px 20px;
 	width: 20%;
@@ -191,6 +213,17 @@
 #submissionimg {
 	display: block;
 	height: 60%;
+	margin-left: auto;
+	margin-right: auto;
+}
+#submissionvid {
+	display: block;
+	height: 60%;
+	margin-left: auto;
+	margin-right: auto;
+}
+#submissionaud {
+	display: block;
 	margin-left: auto;
 	margin-right: auto;
 }
