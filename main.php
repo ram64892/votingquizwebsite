@@ -14,14 +14,178 @@ $result = $conn->query($sql);
 $row = $result->fetch_assoc();
 $currstate = $row['currstate'];
 
+$incorrectType = FALSE;
+$tooLarge = FALSE;
+$emptyTextAnswer = FALSE;
+$maxFileSize = 10; // file size in MB
+$uploadBasePath = "../team$teamId/submissions/";
+$updateSubmissionsTable = FALSE;
+$needToWaitMore = FALSE;
+$missingVote = FALSE;
+
 if (isset($_POST["qnnum"])) {
 	$qnnum = htmlspecialchars($_POST["qnnum"]);
 	if ($qnnum > 0) {
 		if ($currstate == 'answering') {
-			# Process question submission
+			$sql = "SELECT submissiontype FROM questions WHERE id=$qnnum";
+			$result = $conn->query($sql);
+			$row = $result->fetch_assoc();
+			$expectedType = $row['submissiontype'];
+			
+			if ($expectedType == 'text') {
+				// ***************************************TODO****************
+				// check if text answer has been submitted
+				if (isset($_POST["givenAns"])) {
+					// save the text to a text file
+					$answerText = htmlspecialchars($_POST["givenAns"]);
+				
+					if ($answerText == "" || $answerText == NULL) {
+						$emptyTextAnswer = TRUE;
+					}
+					else {
+						// save the text to a file
+						$newFileName = "Team$teamId-Qn$qnnum.txt";
+						$uploadPath = $uploadBasePath . $newFileName;
+						if (file_put_contents($uploadPath, $answerText)) {
+							$updateSubmissionsTable = TRUE;
+
+						}
+						else {
+							die("ERROR: Unable to write to text file $uploadPath for Qn $qnnum");
+						}
+					}
+				}
+				else {
+					die("ERROR: QnNum is posted, but givenAns is missing for a question of type $expectedType for Qn $qnnum");
+				}
+			}
+			else {
+				if (isset($_FILES["fileToUpload"])) {
+				// Get the file information
+				$submissionName = $_FILES["fileToUpload"]["name"];
+				$submissionType = $_FILES["fileToUpload"]["type"];
+				$submissionSize = $_FILES["fileToUpload"]["size"];
+				$submissionTmp = $_FILES["fileToUpload"]["tmp_name"];
+				
+					if ($expectedType == 'video') {
+						// Check if the file is an allowed type
+						$allowedTypes = [
+							"video/mp4",
+							"video/quicktime",
+							"video/mpeg",
+							"video/x-msvideo",
+							"video/x-ms-wmv"
+						];
+
+					}
+					elseif ($expectedType == 'audio') {
+						// Check if the file is an allowed type
+						$allowedTypes = [
+							"audio/mpeg",
+							"audio/wav",
+							"audio/x-m4a"
+						];
+
+					}
+					elseif ($expectedType == 'image') {
+						// Check if the file is an allowed type
+						$allowedTypes = [
+							"image/jpeg",
+							"image/png",
+							"image/gif"
+						];
+					}
+					else {
+						die("ERROR: Invalid submissiontype in questions table ($expectedType) for question $qnnum");
+					}
+				}
+				else {
+					die("ERROR: QnNum is posted, but fileToUpload is missing for a question of type $expectedType for Qn $qnnum");
+				}
+				if (in_array($submissionType, $allowedTypes)) {
+					// check the file size 
+					$maxFileSizeInBytes = $maxFileSize * 1024 * 1024;
+					if ($submissionSize <= $maxFileSizeInBytes) {						
+						// upload the file
+						$submissionExt = pathinfo($submissionName, PATHINFO_EXTENSION);
+						$newFileName = "Team$teamId-Qn$qnnum.$submissionExt";
+						$uploadPath = $uploadBasePath . $newFileName;
+						if (move_uploaded_file($submissionTmp,$uploadPath)) {
+							// update the sumissions table
+							$updateSubmissionsTable = TRUE;
+						}
+						else {
+							die("ERROR: Could not upload file. Error moving file to $uploadPath");
+						}
+					}
+					else {
+						$tooLarge = TRUE;
+						// don't upload anything and let the question display again with the error message about file size
+					}
+				}
+				else {
+					$incorrectType = TRUE;
+					// don't upload anything and let the question display again with the error message about file type
+				}
+				
+			}
+			if ($updateSubmissionsTable) {
+				$sql = "INSERT INTO submissions (teamid, questionid, submissionurl) VALUES ($teamId, $qnnum, '$uploadPath')";
+				if (mysqli_query($conn, $sql)) {
+					// check if the team has reached the end of the questions
+					if ($qnnum == $totalQns) {
+						// set currq to 0 and update currstate to "waiting"
+						$sql = "UPDATE teams SET currq=0,currstate='waiting' WHERE id=$teamId";
+					}
+					else {
+						// update currq to next question number
+						$qnnum++;
+						$sql = "UPDATE teams SET currq=$qnnum WHERE id=$teamId";
+					}
+					if (mysqli_query($conn, $sql)) {
+						// all good. Do nothing here as qnnum and state is already updated
+					}
+					else {
+						die("ERROR: Could not update teams database for team $teamid to move to Qn $qnnum: " . $conn->error);
+					}
+				}
+				else {
+					die("ERROR: Could not update submissions table for qn $qnnum: " . $conn->error);
+				}
+				
+			}
 		}
 		elseif ($currstate == 'voting') {
 			# Process voting submission
+			if (isset($_POST["voting"])) {
+				/*********** TODO ***************/
+				$voteTeamId = htmlspecialchars($_POST["voting"]);
+				$sql = "UPDATE submissions SET numvotes=numvotes+1 WHERE questionid=$qnnum AND teamid=$voteTeamId";
+				if (mysqli_query($conn, $sql)) {
+					// check if the team has reached the end of the questions
+					if ($qnnum == $totalQns) {
+						// set currq to 0 and update currstate to "waiting"
+						$sql = "UPDATE teams SET currq=0,currstate='completed' WHERE id=$teamId";
+					}
+					else {
+						// update currq to next question number
+						$qnnum++;
+						$sql = "UPDATE teams SET currq=$qnnum WHERE id=$teamId";
+					}
+					if (mysqli_query($conn, $sql)) {
+						// all good. Do nothing here as qnnum and state is already updated
+					}
+					else {
+						die("ERROR: Could not update teams database for team $teamid to move to Qn $qnnum: " . $conn->error);
+					}
+				}
+				else {
+					die("ERROR: Could not increment numvotes in submissions table for team $voteTeamId for Question $qnnum: " . $conn->error);
+				}
+			}
+			else {
+				$missingVote = TRUE;
+			}
 		}
 		else {
 			die("ERROR: Invalid state - Question number in POST is $qnnum but teams.currstate is $currstate (It should be ANSWERING or VOTING)");
@@ -34,7 +198,7 @@ if (isset($_POST["qnnum"])) {
 elseif (isset($_POST["startqn"])) {
 	if ($currstate == "notstart") {
 		# Set the state to answering and update currq to 1
-		echo "Currstate is notstart and startqn is set";
+		# echo "Currstate is notstart and startqn is set";
 		$sql = "UPDATE teams SET currq=1,currstate='answering' WHERE id=$teamId";
 		if ($conn->query($sql) == TRUE) {
 			#echo "Record updated successfully to set Currq to 1 and state to answering";
@@ -50,14 +214,30 @@ elseif (isset($_POST["startqn"])) {
 }
 elseif (isset($_POST["startvoting"])) {
 	if ($currstate == "waiting") {
-		# Set the state to voting and update currq to 1
+		# check if all the teams have finished submitting their answers
+		$sql = "SELECT id FROM teams WHERE (currstate='notstart') OR (currstate='answering')";
+		$result = $conn->query($sql);
+		if ($result->num_rows > 0) {
+			$needToWaitMore = TRUE;
+		}
+		else {
+			# Set the state to voting and update currq to 1
+			$sql = "UPDATE teams SET currq=1,currstate='voting' WHERE id=$teamId";
+			if ($conn->query($sql) == TRUE) {
+				#echo "Record updated successfully to set Currq to 1 and state to answering";
+				$currstate="voting";
+			}
+			else {
+				die("Error updating record to set Currq to 1 and state to voting: " . $conn->error);
+			}
+		}
 	}
 	else {
 		die("ERROR: Invalid state - Startvoting is set but teams.currstate is $currstate (It should be WAITING)");
 	}
 }
 else {
-	echo "No relevant post data";
+	#echo "No relevant post data";
 }
 
 #-------
@@ -178,12 +358,13 @@ $(document).ready(function($) {
 <body id="body">
 <!--------- HEADER ---------------->
 <?php 
-$sql = "SELECT name, currq FROM teams WHERE id=$teamId";
+$sql = "SELECT name, currq, currstate FROM teams WHERE id=$teamId";
 $result = $conn->query($sql);
 if ($result->num_rows == 1) {
 	$row = $result->fetch_assoc();
 	$teamName = $row["name"];
 	$currq = $row["currq"];
+	$currstate = $row["currstate"];
 }
 else {
 	die("Error in getting team details");
@@ -238,7 +419,7 @@ if ($currstate == "notstart") {
 <?php
 }
 elseif ($currstate == "answering") {
-	echo "answering";
+	#echo "answering";
 	$sql = "SELECT * FROM questions WHERE id=$currq";
 	$result = $conn->query($sql);
 	if ($result->num_rows == 1) {
@@ -246,6 +427,24 @@ elseif ($currstate == "answering") {
 		$qnid = $row["id"];
 		$questionurl = $row["questionurl"];
 		$title = $row["title"];
+		$qnType = $row["submissiontype"];
+	
+	
+		if ($incorrectType) { 
+?> 
+		<p id="qnincorrect">You have submitted an incorrect file type. The file submission is supposed to be <?echo "$qnType"?> but the file found is of type <?echo "$submissionType"?></p>
+<?php
+		}
+		elseif ($tooLarge) {
+?> 
+		<p id="qnincorrect">You have submitted a file that is too large. The maximum file size is <?echo "$maxFileSize"?> MB</p>
+<?php
+		}
+		elseif ($emptyTextAnswer) {
+?> 
+		<p id="qnincorrect">You have not submitted any text in the textbox - Please resubmit with your text answer</p>
+<?php
+		}
 ?>
 	<div>
 		<h2 id="qntitle">Question <?php echo "$qnid - $title"; ?></h2>
@@ -272,12 +471,26 @@ elseif ($currstate == "answering") {
 			//frame.contentWindow.document.body.scrollWidth+'px';
 			}
         </script>
-
-		<form id="qnanswerform" action="index.php" method="post" target="_self" class="qnanswerform" enctype="multipart/form-data">
+		
+		<form id="qnanswerform" action="index.php" method="post" target="_self" class="qnanswerform" <?php if ($currstate != 'text') {?> enctype="multipart/form-data" <?php } ?>>
 			<input type="hidden" name="qnnum" value=<?php echo "$qnid"; ?> />
 			<p id="qnanswertxt">Submit your content here:</p> <br />
-			<!--<input id="qnanswerbox" type="text" name="givenAns" required />-->
+<?php
+		if ($qnType == 'text') {
+?>
+			<!--<input id="qnanswerbox" type="textarea" name="givenAns" required />-->
+			<textarea id="qnanswertextarea" name="givenAns" rows=20 required></textarea>
+<?php
+		}
+		elseif ($qnType == 'video' || $qnType == 'audio' || $qnType == 'image') {
+?>
 			<input id="fileToUpload" type="file" name="fileToUpload">
+<?php
+		}
+		else {
+			die("ERROR: Invalid Question type ($qnType) for Question $qnid");
+		}
+?>
 			<input id="qnanswersubmit" type="submit" value="Submit" class="qnanswersubmit" />
 		</form>
 	</div>
@@ -290,10 +503,117 @@ elseif ($currstate == "answering") {
 }
 elseif ($currstate == "waiting") {
 	echo "waiting";
+	if ($needToWaitMore) { 
+?> 
+		<p id="qnincorrect">Other teams have not completed their submissions yet. Please continue to wait.</p>
+<?php
+		}
+?>
+		<div id="welcomehdr">
+		Congratulations team <?php echo $teamName ?>!
+		</div>
+		<div id="welcometxt">
+			<p>You have completed your submissions. The next step will be to view the submissions of all the other teams and vote for the ones that you like the best.</p>
+			<p>We have to wait for all the teams to complete their submissions before starting the voting process. Please wait here till you are given the instruction from the host to contine, then click the button below to start voting.</p>
+			<br />
+			
+			<form action="index.php" method="post" target="_self" id="qnanswerform" class="qnanswerform">
+				<input type="hidden" name="startvoting" value="0" />
+				<input id="welcomebtn" type="submit" value="Let's Vote!!!" id="submit" class="submit"/>
+			</form>
+		</div>
+<?php
 }
 elseif ($currstate == "voting") {
 	// display submissions from all the other teams
 	echo "voting";
+	$sql = "SELECT * FROM questions WHERE id=$currq";
+	$result = $conn->query($sql);
+	if ($result->num_rows == 1) {
+		$row = $result->fetch_assoc();
+		$qnid = $row["id"];
+		$questionurl = $row["questionurl"];
+		$title = $row["title"];
+		$qnType = $row["submissiontype"];
+		
+		if ($missingVote) { 
+?> 
+	<p id="qnincorrect">Please vote for one of the submissions before submitting.</p>
+<?php
+		}
+?>
+	<div>
+		<h2 id="qntitle">Question <?php echo "$qnid - $title"; ?></h2>
+<?php
+		$subNum = 1;
+		// Get submissions from all teams except the current team for this specific question
+		$sql = "SELECT * FROM submissions WHERE teamid!=$teamId AND questionid=$qnid";
+		$result = $conn->query($sql);
+		while($row = mysqli_fetch_array($result)) {
+			$subUrl = $row["submissionurl"];
+			$subTeam = $row["teamid"];
+?>
+		<div id="dispsubmission">
+			<h3 id="submissionnum">Submission <?php echo $subNum; ?></h3>
+<?php
+			if ($qnType == 'image') {
+?>
+			<img id="submissionimg" src=<?php echo $subUrl; ?> />
+			<br />
+<?php
+			}
+			elseif ($qnType == 'video') {
+				
+			}
+			elseif ($qnType == 'audio') {
+				
+			}
+			elseif ($qnType == 'text') {
+?>
+			<pre id="submissiontxt">
+<?php
+				$subText = file_get_contents($subUrl);
+				if ($subText) {
+					echo "$subText\n";
+				}
+				else {
+					die("ERROR: Unable to open text file $subURL of team $subTeam for question $qnid");
+				}
+?>
+			</pre>
+<?php
+			}
+?>
+		</div>
+<?php
+			$subTeams[$subNum] = $subTeam;
+			$subNum++;
+		}
+?>
+		<div id="submissionvote">
+			<form id="votingform" action="index.php" method="post" target="_self" class="votingform">
+				<input type="hidden" name="qnnum" value=<?php echo "$qnid"; ?> />
+				<p id="qnanswertxt">Vote for your favourite submission:</p> <br />
+			
+<?php
+		for ($i = 1; $i < $subNum; $i++) {
+?>
+				<label id="votelabel">
+				<input type="radio" name="voting" value="<?php echo $subTeams[$i]; ?>">
+				Submission <?php echo $i; ?>
+				</label>
+<?php
+		}
+?>
+				<input id="votesubmit" type="submit" value="Submit" class="votesubmit" />
+			</form>
+		</div>
+<?php
+	}
+	else {
+		die("Error in getting question details for $currq");
+	}
+	
 }
 elseif ($currstate == "completed") {
 ?>
@@ -307,7 +627,7 @@ elseif ($currstate == "completed") {
 
 }
 else {
-	die("ERROR: Invalid state found in display");
+	die("ERROR: Invalid state found in display section ($currstate)");
 }
 ?>
 
@@ -412,7 +732,7 @@ else {
 </div>
 
 <!--------- STATUS ---------------->
-
+<!--
 <div id="status">
 
 	<h3 id="statustitle"> Current team status:</h3>
@@ -461,6 +781,6 @@ else {
 
 	</table>
 </div>
-
+-->
 </body>
 </html>

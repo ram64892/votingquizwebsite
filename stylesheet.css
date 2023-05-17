@@ -150,6 +150,16 @@
 #qnanswerbox:focus {
   background-color: lightblue;
 }
+#qnanswertextarea {
+	padding: 12px 20px;
+	width: 50%;
+	font-size:125%;
+	padding-top: 10px;
+	padding-left: 10px;
+}
+#qnanswertextarea:focus {
+  background-color: lightblue;
+}
 #qnanswersubmit {
     width: 30%;
     background-color: burlywood;
@@ -163,6 +173,50 @@
     margin-left: 10px;
 }
 #qnanswersubmit:hover {
+	box-shadow: inset 0px 12px 16px 0px rgb(0 0 0 / 24%), 0 17px 50px 0 rgb(0 0 0 / 19%);
+	background-color: #f9dbb5;
+	text-decoration: underline;
+}
+#dispsubmission {
+	border-bottom: 1px solid orange;
+	text-align: center;
+}
+#submissionnum {
+	font-size: 150%;
+	color: orange;
+	padding: 10px;
+	font-family: bradley hand itc;
+	text-align: center;
+}
+#submissionimg {
+	display: block;
+	height: 60%;
+	margin-left: auto;
+	margin-right: auto;
+}
+#submissiontxt {
+	font-size: 125%;
+	color: rosybrown;
+}
+#votelabel {
+	color: orange;
+	font-family: calibri;
+	font-size: 150%;
+	margin: 20px;
+}
+#votesubmit {
+    width: 30%;
+    background-color: burlywood;
+    color: black;
+    text-decoration: none;
+    font-size: 200%;
+    font-family: copperplate gothic;
+    font-weight: bold;
+    display: block;
+    margin-top: 25px;
+    margin-left: 10px;
+}
+#votesubmit:hover {
 	box-shadow: inset 0px 12px 16px 0px rgb(0 0 0 / 24%), 0 17px 50px 0 rgb(0 0 0 / 19%);
 	background-color: #f9dbb5;
 	text-decoration: underline;
