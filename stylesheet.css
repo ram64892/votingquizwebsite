@@ -231,6 +231,12 @@
 	font-size: 125%;
 	color: rosybrown;
 }
+#voteintrotxt {
+	text-align: left;
+	font-size: 200%;
+	font-family: Papyrus;
+	color: orange;
+}
 #votelabel {
 	color: orange;
 	font-family: calibri;

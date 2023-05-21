@@ -374,7 +374,7 @@ else {
 <div id="header">
 
 	<h1 id="hdrteamname">Bingo A.I. Challenge<br />Team <?php echo "$teamName";?></h1>
-
+<!--
 	<div class="hdrlinks">
 		<p>Useful links</p>
 		<ul>
@@ -390,6 +390,7 @@ else {
 		</ul>
 		<br />
 	</div>
+-->
 </div>
 
 <!--------- QUESTION ---------------->
@@ -405,8 +406,14 @@ if ($currstate == "notstart") {
 		Welcome team <?php echo "$teamId - $teamName"; ?>
 	</div>
 	<div id="welcometxt">
-	<p>In today's quiz, your creativity will be put to the test. Today, you will not just be answering questions - you will be creating content! The aim is to create content that impresses the other teams or makes them laugh.</p>
-	<p>For each question, you will learn to use an AI tool to generate your content. Once you have created your answer, submit it on this website. All the teams will then vote on the submissions they like the most. The team with the most votes wins!</p>
+	<p>In today's quiz, your creativity will be put to the test.</p> 
+	<p>This time, you will not be answering questions. Instead, you will be given 4 projects.</p>
+	<p>For each project, you will use an A.I. tool to create content!</p>
+	<p>Once you have completed your project, submit the creation on this website.</p>
+	<p>The goal is to create content that impresses the other teams enough to vote for your content.</p>
+	<p>You have a total of 45 minutes to complete all 4 projects. Budget your time wisely.</p>
+	<p>Once all teams have completed their 4 projects, each team will then vote on everyone else's submissions.</p>
+	<p><strong>The team with the most votes wins!</strong></p><br />
 	<p>Click the button below to start.</p>
 
 		<video src="../binary.mp4" autoplay muted loop>
@@ -415,7 +422,7 @@ if ($currstate == "notstart") {
 		
 		<form action="index.php" method="post" target="_self" id="qnanswerform" class="qnanswerform">
 			<input type="hidden" name="startqn" value="0" />
-			<input id="welcomebtn" type="submit" value="Ready, Set... Let's AI!!!" id="submit" class="submit"/>
+			<input id="welcomebtn" type="submit" value="Let's Get Started!" id="submit" class="submit"/>
 		</form>
 	</div>
 <?php
@@ -514,9 +521,13 @@ elseif ($currstate == "waiting") {
 		<div id="welcomehdr">
 		Congratulations team <?php echo $teamName ?>!
 		</div>
-		<div id="welcometxt">
-			<p>You have completed your submissions. The next step will be to view the submissions of all the other teams and vote for the ones that you like the best.</p>
-			<p>We have to wait for all the teams to complete their submissions before starting the voting process. Please wait here till you are given the instruction from the host to contine, then click the button below to start voting.</p>
+		<div id="voteintrotxt">
+			<p>You have completed your projects.</p>
+			<p>The next step will be to view the submissions of all the other teams and vote for the ones that you like the best.</p>
+			<p>We have to wait for all the teams to complete their submissions before starting the voting process.</p>
+			<p>When voting, you will not know which team each submission belongs to.</p>
+			<br />
+			<p>Please wait here till you are given the instruction from the host to contine, then click the button below to start voting.</p>
 			<br />
 			
 			<form action="index.php" method="post" target="_self" id="qnanswerform" class="qnanswerform">
@@ -548,6 +559,7 @@ elseif ($currstate == "voting") {
 		<h2 id="qntitle">Question <?php echo "$qnid - $title"; ?></h2>
 <?php
 		$subNum = 1;
+		$subLabels = ["A","B","C"];
 		// Get submissions from all teams except the current team for this specific question
 		$sql = "SELECT * FROM submissions WHERE teamid!=$teamId AND questionid=$qnid";
 		$result = $conn->query($sql);

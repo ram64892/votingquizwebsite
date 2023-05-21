@@ -72,3 +72,51 @@ Main:
 
 	- Radio button to vote
 	
+
+Intro:
+	
+	I think some of you already guessed that the theme for today's session is Artifical Intelligence (A.I.).
+	
+	So before we start let's talk a little bit about what A.I. is and why we decided to focus on A.I. today.
+	
+	Artifical Intelligence is the attempt to make computers behave more like humans by emulating human intelligence.
+	
+	This is not easy to do, because computers are actually just very fast calculators. They follow instructions really well, but can't think on their own.
+	
+	Research into A.I. has been going on for decades, and actually A.I. has been used in many places for a long time, but it was mainly used in ways that would not be obvious to most people in their daily lives. 
+	
+	For example, during COVID, many airports and shopping malls used A.I. software to look at security camera feeds to pick out anyone who was not wearing a mask.
+	
+	Recently, there has been a lot of buzz about A.I because now A.I. applications have reached a level where normal people can take advantage of A.I. in their everyday lives.
+	
+	It is important that we are aware of the power of A.I. so that we can harness it for our benefit, while also being aware of how it can be used in harmful ways.
+	
+	And this is the reason why we decided to have today's session - to give everyone the opportunity to experience the power of A.I.
+	
+	Today's session will be in a format that we have not used before. 
+	
+	The session will be broken into 2 parts.
+	
+	In the first part, instead of quiz questions, you will be given 4 projects.
+	
+	For each project, you will be using a different A.I. tool on the internet to create content.
+	
+	You will submit the generated content in the form of images, videos or text, on the web page itself.
+	There is a file size limit of 10MB for each submission.
+	
+	For this first part, you will have a total of 45 minutes.
+	Given that this is a creative challenge, the amount of time you spend will influence the quality of the final outcome. Therefore you will need to budget enough time for each task.
+	
+	Remember that the first couple of projects will need less time than the last few projects, so budget your time accordingly. 
+	
+	Also, You cannot come back to a project after you have submitted, so please be absolutely sure that you are happy with your content before submitting.
+	
+	Once all teams have completed the first part, then we move to the second part.
+	
+	In the second part, each team will be able to view all the submissions of the other teams and vote for their favourite.
+	
+	The voting will be blind, meaning you will not be able to tell which team made which submission.
+	
+	At the end we will tally the votes for each project and the team with the highest number of votes for each project will be declared the winner of that project.
+	
+	The team with the most wins will be declared the overall winner.
